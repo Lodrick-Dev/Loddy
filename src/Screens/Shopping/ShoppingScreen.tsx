@@ -20,8 +20,6 @@ type Item = {
   qty: number;
   price: number;
 };
-const normalizeNumber = (value: string) =>
-  value.replace(',', '.');
 export default function ShoppingScreen() {
   const [items, setItems] = useState<Item[]>([]);
   const [name, setName] = useState('');
@@ -30,29 +28,44 @@ export default function ShoppingScreen() {
   const [infoVisible, setInfoVisible] = useState(false);
 
   const total = useMemo(
-    () =>
-      items.reduce((sum, i) => sum + i.qty * i.price, 0),
-    [items]
+    () => items.reduce((sum, i) => sum + i.qty * i.price, 0),
+    [items],
   );
 
+  // Fonction pour parser correctement le prix
+  const parsePrice = (input: string) => {
+    // On remplace la virgule par un point
+    let cleaned = input.replace(',', '.');
+
+    // On supprime tous les caractères qui ne sont pas chiffre ou point
+    cleaned = cleaned.replace(/[^0-9.]/g, '');
+
+    // Si plus d’un point, on considère la saisie invalide
+    const parts = cleaned.split('.');
+    if (parts.length > 2) return '';
+
+    // Limite à 2 décimales
+    if (parts[1]?.length > 2) {
+      cleaned = parts[0] + '.' + parts[1].slice(0, 2);
+    }
+
+    return cleaned;
+  };
+
   const addItem = () => {
-      const normalizedQty = Number(normalizeNumber(qty));
-  const normalizedPrice = Number(normalizeNumber(price));
-    if (
-    !name ||
-    isNaN(normalizedQty) ||
-    isNaN(normalizedPrice)
-  ) {
-    return;
-  }
+    const normalizedQty = Number(qty);
+    const normalizedPrice = Number(price);
+    if (!name || isNaN(normalizedQty) || isNaN(normalizedPrice)) {
+      return;
+    }
 
     //sauvegarde dans le storage
-     const newItem = {
-    id: Date.now().toString(),
-    name,
-    qty: normalizedQty,
-    price: normalizedPrice,
-  };
+    const newItem = {
+      id: Date.now().toString(),
+      name,
+      qty: normalizedQty,
+      price: normalizedPrice,
+    };
     saveItemsStorage([...items, newItem]);
 
     setName('');
@@ -60,22 +73,22 @@ export default function ShoppingScreen() {
     setPrice('');
   };
   const saveItemsStorage = async (newItems: Item[]) => {
-  setItems(newItems);
-  try {
-    await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newItems));
-  } catch (e) {
-    console.log('Erreur sauvegarde des produits :', e);
-  }
-};
-const deleteAllItems = () => {
+    setItems(newItems);
+    try {
+      await AsyncStorage.setItem(STORAGE_KEY, JSON.stringify(newItems));
+    } catch (e) {
+      console.log('Erreur sauvegarde des produits :', e);
+    }
+  };
+  const deleteAllItems = () => {
     Alert.alert(
       'Supprimer tous les produits',
       'Êtes-vous sûr de vouloir supprimer tous les produits ?',
       [
         { text: 'Annuler', style: 'cancel' },
-        { 
-          text: 'Supprimer', 
-          style: 'destructive', 
+        {
+          text: 'Supprimer',
+          style: 'destructive',
           onPress: async () => {
             setItems([]); // vide le state
             try {
@@ -83,59 +96,63 @@ const deleteAllItems = () => {
             } catch (e) {
               console.log('Erreur suppression de tous les produits :', e);
             }
-          } 
+          },
         },
-      ]
+      ],
     );
   };
 
-
-useEffect(() => {
-  const loadItems = async () => {
-    try {
-      const stored = await AsyncStorage.getItem(STORAGE_KEY);
-      if (stored) setItems(JSON.parse(stored));
-    } catch (e) {
-      console.log('Erreur chargement des produits :', e);
-    }
-  };
-  loadItems();
-}, []);
+  useEffect(() => {
+    const loadItems = async () => {
+      try {
+        const stored = await AsyncStorage.getItem(STORAGE_KEY);
+        if (stored) setItems(JSON.parse(stored));
+      } catch (e) {
+        console.log('Erreur chargement des produits :', e);
+      }
+    };
+    loadItems();
+  }, []);
 
   return (
     <SafeAreaView style={styles.container}>
       <View style={styles.totalBox}>
         <Text style={styles.totalLabel}>Total</Text>
-  <View style={styles.boxtotal}>
-    <Text style={styles.totalValue}>
-          {total.toFixed(2)} €
-        </Text>
-        <Pressable
-    onPress={() => setInfoVisible(true)}
-    style={styles.btnInfos}
-  >
-    <Text style={styles.textInfos}>
-      !
-    </Text>
-  </Pressable>
-  </View>
+        <View style={styles.boxtotal}>
+          <Text style={styles.totalValue}>{total.toFixed(2)} €</Text>
+          <Pressable
+            onPress={() => setInfoVisible(true)}
+            style={styles.btnInfos}
+          >
+            <Text style={styles.textInfos}>!</Text>
+          </Pressable>
+        </View>
         <Text style={styles.totalProducts}>Produits: {items.length}</Text>
         {items.length > 0 && (
           <Pressable
-            style={[styles.button, { backgroundColor: "#EF4444", marginTop: 10 }]}
+            style={[
+              styles.button,
+              { backgroundColor: '#EF4444', marginTop: 10 },
+            ]}
             onPress={deleteAllItems}
           >
             <Text style={styles.buttonText}>Supprimer tout</Text>
           </Pressable>
         )}
       </View>
-          <FlatList
-              data={items}
-              keyExtractor={(item) => item.id}
-              renderItem={({ item }) => (
-                <SwipeableItem item={item} onDelete={(id)=> { const filtered = items.filter((i)=>i.id !==id); saveItemsStorage(filtered)}} />
-              )}
+      <FlatList
+        data={items}
+        keyExtractor={item => item.id}
+        renderItem={({ item }) => (
+          <SwipeableItem
+            item={item}
+            onDelete={id => {
+              const filtered = items.filter(i => i.id !== id);
+              saveItemsStorage(filtered);
+            }}
           />
+        )}
+      />
       <View style={styles.form}>
         <TextInput
           placeholder="Produit"
@@ -154,7 +171,7 @@ useEffect(() => {
           placeholder="Prix"
           keyboardType="decimal-pad"
           value={price}
-          onChangeText={(text)=>setPrice(normalizeNumber(text))}
+          onChangeText={text => setPrice(parsePrice(text))}
           style={styles.input}
         />
 
@@ -162,7 +179,11 @@ useEffect(() => {
           <Text style={styles.buttonText}>Ajouter</Text>
         </Pressable>
       </View>
-      <ModalInfos visible={infoVisible} onClose={() => setInfoVisible(false)} websiteUrl="https://loryum.com" />
+      <ModalInfos
+        visible={infoVisible}
+        onClose={() => setInfoVisible(false)}
+        websiteUrl="https://loryum.com"
+      />
     </SafeAreaView>
   );
 }
