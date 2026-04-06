@@ -156,12 +156,14 @@ export default function ShoppingScreen() {
       <View style={styles.form}>
         <TextInput
           placeholder="Produit"
+          placeholderTextColor="#6B7280"
           value={name}
           onChangeText={setName}
           style={styles.input}
         />
         <TextInput
           placeholder="Qté"
+          placeholderTextColor="#6B7280"
           keyboardType="number-pad"
           value={qty}
           onChangeText={setQty}
@@ -169,6 +171,7 @@ export default function ShoppingScreen() {
         />
         <TextInput
           placeholder="Prix"
+          placeholderTextColor="#6B7280" //pour que le placeholder soit visible sur les écrans sombres
           keyboardType="decimal-pad"
           value={price}
           onChangeText={text => setPrice(parsePrice(text))}

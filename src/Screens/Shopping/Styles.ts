@@ -1,5 +1,5 @@
-import { StyleSheet } from "react-native";
-import { colors } from "../../Theme/Colors";
+import { StyleSheet } from 'react-native';
+import { colors } from '../../Theme/Colors';
 
 export const styles = StyleSheet.create({
   container: {
@@ -17,7 +17,7 @@ export const styles = StyleSheet.create({
     borderBottomWidth: 1,
     borderColor: '#BBF7D0',
   },
-  boxtotal:{
+  boxtotal: {
     flexDirection: 'row',
     alignItems: 'center',
     justifyContent: 'space-between',
@@ -27,26 +27,26 @@ export const styles = StyleSheet.create({
     color: '#16A34A',
     fontSize: 14,
   },
-  btnInfos:{
+  btnInfos: {
     marginLeft: 8,
-      width: 20,
-      height: 20,
-      borderRadius: 10,
-      backgroundColor: colors.textSecondary,
-      alignItems: 'center',
-      justifyContent: 'center',
+    width: 20,
+    height: 20,
+    borderRadius: 10,
+    backgroundColor: colors.textSecondary,
+    alignItems: 'center',
+    justifyContent: 'center',
   },
-  textInfos:{
+  textInfos: {
     color: colors.white,
     fontWeight: 'bold',
-    fontSize: 12
+    fontSize: 12,
   },
   totalValue: {
     color: '#16A34A',
     fontSize: 32,
     fontWeight: '700',
   },
-  totalProducts:{
+  totalProducts: {
     marginTop: 4,
     color: colors.textSecondary,
     fontSize: 14,
@@ -83,6 +83,8 @@ export const styles = StyleSheet.create({
     borderRadius: 10,
     padding: 12,
     marginBottom: 8,
+    backgroundColor: '#fff', // important
+    color: '#000', // important
   },
   button: {
     backgroundColor: colors.primary,
